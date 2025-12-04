@@ -5,7 +5,17 @@ import 'leaflet/dist/leaflet.css';
 import type * as Leaflet from 'leaflet';
 import { MapPin, X } from 'lucide-react';
 
-// Bangladesh Divisions with their names and colors
+/*
+  NOTE (how to get precise geojson):
+  - Put precise GeoJSON files named bd-divisions.json and bd-districts.json into either:
+      1) app/(dashboards)/map/_components/data/  (bundled with the app; the code will try `import` first)
+      2) public/ (root public) as /bd-divisions.json and /bd-districts.json (the code will try fetch('/bd-divisions.json'))
+  - Example commands (project root):
+      mkdir -p app/(dashboards)/map/_components/data
+      curl -L -o app/(dashboards)/map/_components/data/bd-divisions.json  "https://raw.githubusercontent.com/geodatanz/bangladesh-geojson/master/divisions.json"
+      curl -L -o app/(dashboards)/map/_components/data/bd-districts.json  "https://raw.githubusercontent.com/geodatanz/bangladesh-geojson/master/districts.json"
+*/
+
 const DIVISIONS = [
   { name: 'Dhaka', color: '#FF6B6B' },
   { name: 'Chittagong', color: '#4ECDC4' },
@@ -17,9 +27,7 @@ const DIVISIONS = [
   { name: 'Mymensingh', color: '#FD79A8' }
 ];
 
-// Bangladesh Districts with their division mappings
 const DISTRICTS = [
-  // Dhaka Division
   { name: 'Dhaka', division: 'Dhaka', color: '#E74C3C' },
   { name: 'Gazipur', division: 'Dhaka', color: '#E67E22' },
   { name: 'Tangail', division: 'Dhaka', color: '#F39C12' },
@@ -33,8 +41,7 @@ const DISTRICTS = [
   { name: 'Madaripur', division: 'Dhaka', color: '#27AE60' },
   { name: 'Rajbari', division: 'Dhaka', color: '#F39C12' },
   { name: 'Shariatpur', division: 'Dhaka', color: '#D35400' },
-  
-  // Chittagong Division
+
   { name: 'Chittagong', division: 'Chittagong', color: '#1890FF' },
   { name: "Cox's Bazar", division: 'Chittagong', color: '#2F54EB' },
   { name: 'Rangamati', division: 'Chittagong', color: '#722ED1' },
@@ -46,8 +53,7 @@ const DISTRICTS = [
   { name: 'Noakhali', division: 'Chittagong', color: '#F759AB' },
   { name: 'Brahmanbaria', division: 'Chittagong', color: '#597EF7' },
   { name: 'Chandpur', division: 'Chittagong', color: '#9254DE' },
-  
-  // Rajshahi Division
+
   { name: 'Rajshahi', division: 'Rajshahi', color: '#13C2C2' },
   { name: 'Bogura', division: 'Rajshahi', color: '#52C41A' },
   { name: 'Pabna', division: 'Rajshahi', color: '#FA8C16' },
@@ -56,8 +62,7 @@ const DISTRICTS = [
   { name: 'Naogaon', division: 'Rajshahi', color: '#2F54EB' },
   { name: 'Chapainawabganj', division: 'Rajshahi', color: '#FA541C' },
   { name: 'Joypurhat', division: 'Rajshahi', color: '#F759AB' },
-  
-  // Khulna Division
+
   { name: 'Khulna', division: 'Khulna', color: '#FA8C16' },
   { name: 'Satkhira', division: 'Khulna', color: '#FA541C' },
   { name: 'Jessore', division: 'Khulna', color: '#13C2C2' },
@@ -68,22 +73,19 @@ const DISTRICTS = [
   { name: 'Chuadanga', division: 'Khulna', color: '#F759AB' },
   { name: 'Kushtia', division: 'Khulna', color: '#597EF7' },
   { name: 'Meherpur', division: 'Khulna', color: '#9254DE' },
-  
-  // Barishal Division
+
   { name: 'Barishal', division: 'Barishal', color: '#EB2F96' },
   { name: 'Patuakhali', division: 'Barishal', color: '#C41D7F' },
   { name: 'Bhola', division: 'Barishal', color: '#FA541C' },
   { name: 'Pirojpur', division: 'Barishal', color: '#F759AB' },
   { name: 'Jhalokathi', division: 'Barishal', color: '#597EF7' },
   { name: 'Barguna', division: 'Barishal', color: '#9254DE' },
-  
-  // Sylhet Division
+
   { name: 'Sylhet', division: 'Sylhet', color: '#597EF7' },
   { name: 'Moulvibazar', division: 'Sylhet', color: '#2F54EB' },
   { name: 'Habiganj', division: 'Sylhet', color: '#722ED1' },
   { name: 'Sunamganj', division: 'Sylhet', color: '#9254DE' },
-  
-  // Rangpur Division
+
   { name: 'Rangpur', division: 'Rangpur', color: '#9254DE' },
   { name: 'Dinajpur', division: 'Rangpur', color: '#722ED1' },
   { name: 'Gaibandha', division: 'Rangpur', color: '#2F54EB' },
@@ -92,8 +94,7 @@ const DISTRICTS = [
   { name: 'Nilphamari', division: 'Rangpur', color: '#FA541C' },
   { name: 'Panchagarh', division: 'Rangpur', color: '#EB2F96' },
   { name: 'Thakurgaon', division: 'Rangpur', color: '#13C2C2' },
-  
-  // Mymensingh Division
+
   { name: 'Mymensingh', division: 'Mymensingh', color: '#FF85C0' },
   { name: 'Jamalpur', division: 'Mymensingh', color: '#F759AB' },
   { name: 'Netrokona', division: 'Mymensingh', color: '#EB2F96' },
@@ -130,7 +131,6 @@ export default function MapContent() {
     return DISTRICTS.filter(d => d.division === selectedDivision);
   }, [selectedDivision]);
 
-  // approximate division centroids (lat, lng) for fallback when GeoJSON is unavailable
   const DIVISION_CENTROIDS: Record<string, [number, number]> = {
     Dhaka: [23.8103, 90.4125],
     Chittagong: [22.3569, 91.7832],
@@ -142,13 +142,11 @@ export default function MapContent() {
     Mymensingh: [24.7471, 90.4203]
   };
 
-  // helper: generate a square polygon around a lat/lng center
   const makeSquareFeature = (name: string, center: [number, number], halfSizeKm: number) => {
-    // approximate conversions
     const lat = center[0];
     const lon = center[1];
-    const halfLatDeg = halfSizeKm / 111.0; // km -> degrees lat (approx)
-    const halfLonDeg = halfSizeKm / (111.0 * Math.cos((lat * Math.PI) / 180)); // adjust by latitude
+    const halfLatDeg = halfSizeKm / 111.0;
+    const halfLonDeg = halfSizeKm / (111.0 * Math.cos((lat * Math.PI) / 180));
     const coords: [number, number][] = [
       [lon - halfLonDeg, lat - halfLatDeg],
       [lon + halfLonDeg, lat - halfLatDeg],
@@ -163,7 +161,6 @@ export default function MapContent() {
     };
   };
 
-  // robust fetch + parse for GeoJSON (handles JSON, text with BOM, gists wrapped in text)
   const tryFetchGeoJSON = async (url: string) => {
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} (${url})`);
@@ -192,9 +189,6 @@ export default function MapContent() {
     }
   };
 
-  // Initialize map and load GeoJSON (local public first, then CDN, then raw sources).
-  // If all remote/local sources fail, generate a lightweight approximate GeoJSON
-  // (squares around division centroids and smaller squares for districts) so the map remains usable
   useEffect(() => {
     if (!isClient) return;
     if (mapInitializedRef.current) return;
@@ -208,7 +202,7 @@ export default function MapContent() {
       const L = (mod as any).default ?? mod;
       LRef.current = L;
 
-      // leaflet default icon fix
+      // icon fix
       // @ts-ignore
       delete L.Icon.Default.prototype._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -226,93 +220,113 @@ export default function MapContent() {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      // Try a variety of sources (local first)
-      const divisionUrls = [
-        '/bd-divisions.json', // public/
-        '/geo/bd-divisions.json', // alternate public path
+      const divisionUrlsFallback = [
         'https://cdn.jsdelivr.net/gh/geodatanz/bangladesh-geojson@master/divisions.json',
         'https://cdn.jsdelivr.net/gh/mohosinmiah/BD-Geo-JSON@master/division.geojson',
         'https://raw.githubusercontent.com/geodatanz/bangladesh-geojson/master/divisions.json',
-        'https://raw.githubusercontent.com/mohosinmiah/BD-Geo-JSON/master/division.geojson',
-        'https://gist.githubusercontent.com/lekhoni/4165017c47a9e63f4f81/raw/bangladesh-divisions.json'
+        'https://raw.githubusercontent.com/mohosinmiah/BD-Geo-JSON/master/division.geojson'
       ];
-
-      const districtUrls = [
-        '/bd-districts.json', // public/
-        '/geo/bd-districts.json',
+      const districtUrlsFallback = [
         'https://cdn.jsdelivr.net/gh/geodatanz/bangladesh-geojson@master/districts.json',
         'https://cdn.jsdelivr.net/gh/mohosinmiah/BD-Geo-JSON@master/district.geojson',
         'https://raw.githubusercontent.com/geodatanz/bangladesh-geojson/master/districts.json',
-        'https://raw.githubusercontent.com/mohosinmiah/BD-Geo-JSON/master/district.geojson',
-        'https://gist.githubusercontent.com/lekhoni/4165017c47a9e63f4f81/raw/bangladesh-districts.json'
+        'https://raw.githubusercontent.com/mohosinmiah/BD-Geo-JSON/master/district.geojson'
       ];
 
-      const triedDivisionUrls: string[] = [];
-      const triedDistrictUrls: string[] = [];
-
       let divisionLoaded = false;
+      let districtLoaded = false;
       let lastDivisionError: Error | null = null;
-      for (const url of divisionUrls) {
-        triedDivisionUrls.push(url);
+      let lastDistrictError: Error | null = null;
+
+      try {
+        // try bundled data import (if present)
+        // @ts-ignore
+        const divisionsModule = await import('./data/bd-divisions.json');
+        // @ts-ignore
+        const districtsModule = await import('./data/bd-districts.json');
+        divisionGeoJsonRef.current = divisionsModule.default ?? divisionsModule;
+        districtGeoJsonRef.current = districtsModule.default ?? districtsModule;
+
+        allDivisionsLayerRef.current = L.geoJSON(divisionGeoJsonRef.current, {
+          style: { fillColor: 'transparent', weight: 2, opacity: 0.3, color: '#666', fillOpacity: 0 }
+        }).addTo(map);
+
+        allDistrictsLayerRef.current = L.geoJSON(districtGeoJsonRef.current, {
+          style: { fillColor: 'transparent', weight: 1, opacity: 0.2, color: '#999', fillOpacity: 0 }
+        }).addTo(map);
+
+        divisionLoaded = true;
+        districtLoaded = true;
+      } catch {
+        // continue to fetch attempts
+      }
+
+      if (!divisionLoaded) {
         try {
-          const geo = await tryFetchGeoJSON(url);
-          if (!geo) throw new Error('Empty division geojson');
+          const geo = await tryFetchGeoJSON('/bd-divisions.json');
           divisionGeoJsonRef.current = geo;
           allDivisionsLayerRef.current = L.geoJSON(geo, {
-            style: {
-              fillColor: 'transparent',
-              weight: 2,
-              opacity: 0.3,
-              color: '#666',
-              fillOpacity: 0
-            }
+            style: { fillColor: 'transparent', weight: 2, opacity: 0.3, color: '#666', fillOpacity: 0 }
           }).addTo(map);
           divisionLoaded = true;
-          break;
         } catch (err) {
           lastDivisionError = err as Error;
-          console.debug('Division load failed for', url, err);
         }
       }
 
-      let districtLoaded = false;
-      let lastDistrictError: Error | null = null;
-      for (const url of districtUrls) {
-        triedDistrictUrls.push(url);
+      if (!districtLoaded) {
         try {
-          const geo = await tryFetchGeoJSON(url);
-          if (!geo) throw new Error('Empty district geojson');
+          const geo = await tryFetchGeoJSON('/bd-districts.json');
           districtGeoJsonRef.current = geo;
           allDistrictsLayerRef.current = L.geoJSON(geo, {
-            style: {
-              fillColor: 'transparent',
-              weight: 1,
-              opacity: 0.2,
-              color: '#999',
-              fillOpacity: 0
-            }
+            style: { fillColor: 'transparent', weight: 1, opacity: 0.2, color: '#999', fillOpacity: 0 }
           }).addTo(map);
           districtLoaded = true;
-          break;
         } catch (err) {
           lastDistrictError = err as Error;
-          console.debug('District load failed for', url, err);
         }
       }
 
-      // If remote/local geojson not available, generate small approximate polygons
+      if (!divisionLoaded) {
+        for (const url of divisionUrlsFallback) {
+          try {
+            const geo = await tryFetchGeoJSON(url);
+            divisionGeoJsonRef.current = geo;
+            allDivisionsLayerRef.current = L.geoJSON(geo, {
+              style: { fillColor: 'transparent', weight: 2, opacity: 0.3, color: '#666', fillOpacity: 0 }
+            }).addTo(map);
+            divisionLoaded = true;
+            break;
+          } catch (err) {
+            lastDivisionError = err as Error;
+          }
+        }
+      }
+
+      if (!districtLoaded) {
+        for (const url of districtUrlsFallback) {
+          try {
+            const geo = await tryFetchGeoJSON(url);
+            districtGeoJsonRef.current = geo;
+            allDistrictsLayerRef.current = L.geoJSON(geo, {
+              style: { fillColor: 'transparent', weight: 1, opacity: 0.2, color: '#999', fillOpacity: 0 }
+            }).addTo(map);
+            districtLoaded = true;
+            break;
+          } catch (err) {
+            lastDistrictError = err as Error;
+          }
+        }
+      }
+
       if (!divisionLoaded || !districtLoaded) {
-        // Build approx division polygon features (squares around centroids)
         const divisionsFc = {
           type: 'FeatureCollection',
           features: DIVISIONS.map(d => {
             const center = DIVISION_CENTROIDS[d.name] ?? defaultCenter;
-            // divisions get ~55 km half-size (square ~110x110 km) - coarse but usable
             return makeSquareFeature(d.name, center, 55);
           })
         };
-
-        // District squares: center on division centroid but much smaller (~18 km half-size)
         const districtsFc = {
           type: 'FeatureCollection',
           features: DISTRICTS.map(dist => {
@@ -320,42 +334,23 @@ export default function MapContent() {
             return makeSquareFeature(dist.name, center, 18);
           })
         };
-
-        // use generated geojson so highlighting/filtering by name still works (feature.properties.name)
         divisionGeoJsonRef.current = divisionsFc;
         districtGeoJsonRef.current = districtsFc;
-
-        // Add generated layers to map (transparent baseline)
         allDivisionsLayerRef.current = L.geoJSON(divisionsFc, {
-          style: {
-            fillColor: 'transparent',
-            weight: 2,
-            opacity: 0.25,
-            color: '#666',
-            fillOpacity: 0
-          }
+          style: { fillColor: 'transparent', weight: 2, opacity: 0.25, color: '#666', fillOpacity: 0 }
         }).addTo(map);
-
         allDistrictsLayerRef.current = L.geoJSON(districtsFc, {
-          style: {
-            fillColor: 'transparent',
-            weight: 1,
-            opacity: 0.18,
-            color: '#999',
-            fillOpacity: 0
-          }
+          style: { fillColor: 'transparent', weight: 1, opacity: 0.18, color: '#999', fillOpacity: 0 }
         }).addTo(map);
-
-        setUseFallbackCentroids(false); // we have generated polygons so use polygon highlighting
-        setGeoJsonLoaded(true);
-
-        // Provide a note to the user but don't spam large error with attempted URLs
+        setUseFallbackCentroids(false);
         setLoadError(
-          'Precise remote GeoJSON not reachable. Using generated approximate boundaries so map remains interactive. Add bd-divisions.json & bd-districts.json to public/ for exact boundaries.'
+          `Could not load precise GeoJSON. Division: ${lastDivisionError?.message ?? 'failed'} | District: ${lastDistrictError?.message ?? 'failed'}. Using generated approximations.`
         );
       } else {
-        setGeoJsonLoaded(true);
+        setLoadError('');
       }
+
+      setGeoJsonLoaded(true);
 
       requestAnimationFrame(() => { try { map.invalidateSize(); } catch {} });
 
@@ -375,80 +370,127 @@ export default function MapContent() {
     };
   }, [isClient]);
 
-  // highlight division using loaded GeoJSON (natural borders) or centroid fallback
+  // reset helpers
+  const resetDivisionStyles = () => {
+    try {
+      allDivisionsLayerRef.current?.eachLayer((ly: any) => {
+        try {
+          ly.setStyle?.({
+            fillColor: 'transparent',
+            color: '#666',
+            weight: 2,
+            opacity: 0.6,
+            fillOpacity: 0
+          });
+        } catch {}
+      });
+    } catch {}
+    try {
+      divisionLayerRef.current?.remove?.();
+    } catch {}
+    divisionLayerRef.current = null;
+  };
+
+  const resetDistrictStyles = () => {
+    try {
+      allDistrictsLayerRef.current?.eachLayer((ly: any) => {
+        try {
+          ly.setStyle?.({
+            fillColor: 'transparent',
+            color: '#999',
+            weight: 1,
+            opacity: 0.6,
+            fillOpacity: 0
+          });
+        } catch {}
+      });
+    } catch {}
+    try {
+      districtLayerRef.current?.remove?.();
+    } catch {}
+    districtLayerRef.current = null;
+  };
+
   useEffect(() => {
     const L = LRef.current;
     const map = mapRef.current;
     if (!mapReady || !L || !map) return;
 
-    if (divisionLayerRef.current) {
-      divisionLayerRef.current.remove();
-      divisionLayerRef.current = null;
-    }
-
+    resetDivisionStyles();
     if (!selectedDivision) return;
 
     const division = DIVISIONS.find(d => d.name === selectedDivision);
     if (!division) return;
 
-    // if we earlier failed to fetch geojson and set useFallbackCentroids true, circle fallback
     if (useFallbackCentroids) {
       const center = DIVISION_CENTROIDS[selectedDivision] ?? defaultCenter;
       const radius = 70000;
       const circle = L.circle(center as any, {
         color: division.color,
-        weight: 2,
+        weight: 3,
         fillColor: division.color,
         fillOpacity: 0.25,
         radius
       }).addTo(map);
-      divisionLayerRef.current = circle;
+      divisionLayerRef.current = L.layerGroup([circle]);
       map.setView(center as any, 7.6, { animate: true });
       return;
     }
 
-    // otherwise use whatever GeoJSON we have (remote, local or generated)
-    if (!geoJsonLoaded || !divisionGeoJsonRef.current) return;
+    if (!geoJsonLoaded || !divisionGeoJsonRef.current || !allDivisionsLayerRef.current) return;
 
     try {
-      const layer = L.geoJSON(divisionGeoJsonRef.current, {
-        filter: (feature: any) => {
-          const p = feature.properties || {};
-          const names = [p.name, p.NAME, p.NAME_1, p.ADM1_EN, p.division].filter(Boolean);
-          return names.some((n: string) => (n as string).toLowerCase().includes(selectedDivision.toLowerCase()));
-        },
-        style: () => ({
-          fillColor: division.color,
-          weight: 2,
-          color: division.color,
-          opacity: 1,
-          fillOpacity: 0.25
-        })
-      }).addTo(map);
+      const matchedLayers: any[] = [];
+      const bounds = (L as any).latLngBounds([]);
 
-      divisionLayerRef.current = layer;
+      allDivisionsLayerRef.current.eachLayer((ly: any) => {
+        const f = ly.feature || {};
+        const p = f.properties || {};
+        const names = [p.name, p.NAME, p.NAME_1, p.ADM1_EN, p.division].filter(Boolean).map(String);
+        const match = names.some(n => n.toLowerCase().includes(selectedDivision.toLowerCase()));
+        if (match) {
+          try {
+            ly.setStyle({
+              fillColor: division.color,
+              color: division.color,
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 0.35
+            });
+            ly.bringToFront?.();
+            matchedLayers.push(ly);
+            if (ly.getBounds) bounds.extend(ly.getBounds());
+          } catch {}
+        } else {
+          try {
+            ly.setStyle({
+              fillColor: 'transparent',
+              color: '#666',
+              weight: 1,
+              opacity: 0.6,
+              fillOpacity: 0
+            });
+          } catch {}
+        }
+      });
 
-      const bounds = layer.getBounds();
+      divisionLayerRef.current = L.layerGroup(matchedLayers);
       if (bounds.isValid()) {
         const size = bounds.getNorthEast().distanceTo(bounds.getSouthWest());
         if (size < 400000) map.fitBounds(bounds.pad(0.05), { animate: true });
+        else map.fitBounds(bounds, { animate: true });
       }
     } catch (err) {
       console.error('Error highlighting division:', err);
     }
   }, [selectedDivision, mapReady, geoJsonLoaded, useFallbackCentroids]);
 
-  // highlight district using loaded GeoJSON or centroid fallback
   useEffect(() => {
     const L = LRef.current;
     const map = mapRef.current;
     if (!mapReady || !L || !map) return;
 
-    if (districtLayerRef.current) {
-      districtLayerRef.current.remove();
-      districtLayerRef.current = null;
-    }
-
+    resetDistrictStyles();
     if (!selectedDistrict) return;
 
     const district = DISTRICTS.find(d => d.name === selectedDistrict);
@@ -459,40 +501,58 @@ export default function MapContent() {
       const radius = 22000;
       const circle = L.circle(center as any, {
         color: district.color,
-        weight: 2,
+        weight: 3,
         fillColor: district.color,
         fillOpacity: 0.35,
         radius
       }).addTo(map);
-      districtLayerRef.current = circle;
+      districtLayerRef.current = L.layerGroup([circle]);
       map.setView(center as any, 9.4, { animate: true });
       return;
     }
 
-    if (!geoJsonLoaded || !districtGeoJsonRef.current) return;
+    if (!geoJsonLoaded || !districtGeoJsonRef.current || !allDistrictsLayerRef.current) return;
 
     try {
-      const layer = L.geoJSON(districtGeoJsonRef.current, {
-        filter: (feature: any) => {
-          const p = feature.properties || {};
-          const names = [p.name, p.NAME, p.NAME_2, p.ADM2_EN, p.district].filter(Boolean);
-          return names.some((n: string) => (n as string).toLowerCase().includes(selectedDistrict.toLowerCase()));
-        },
-        style: () => ({
-          fillColor: district.color,
-          weight: 2,
-          color: district.color,
-          opacity: 1,
-          fillOpacity: 0.35
-        })
-      }).addTo(map);
+      const matched: any[] = [];
+      const bounds = (L as any).latLngBounds([]);
 
-      districtLayerRef.current = layer;
+      allDistrictsLayerRef.current.eachLayer((ly: any) => {
+        const f = ly.feature || {};
+        const p = f.properties || {};
+        const names = [p.name, p.NAME, p.NAME_2, p.ADM2_EN, p.district].filter(Boolean).map(String);
+        const match = names.some(n => n.toLowerCase().includes(selectedDistrict.toLowerCase()));
+        if (match) {
+          try {
+            ly.setStyle({
+              fillColor: district.color,
+              color: district.color,
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.45
+            });
+            ly.bringToFront?.();
+            matched.push(ly);
+            if (ly.getBounds) bounds.extend(ly.getBounds());
+          } catch {}
+        } else {
+          try {
+            ly.setStyle({
+              fillColor: 'transparent',
+              color: '#999',
+              weight: 1,
+              opacity: 0.6,
+              fillOpacity: 0
+            });
+          } catch {}
+        }
+      });
 
-      const bounds = layer.getBounds();
+      districtLayerRef.current = L.layerGroup(matched);
       if (bounds.isValid()) {
         const size = bounds.getNorthEast().distanceTo(bounds.getSouthWest());
         if (size < 400000) map.fitBounds(bounds.pad(0.05), { animate: true });
+        else map.fitBounds(bounds, { animate: true });
       }
     } catch (err) {
       console.error('Error highlighting district:', err);
@@ -500,14 +560,8 @@ export default function MapContent() {
   }, [selectedDistrict, mapReady, geoJsonLoaded, useFallbackCentroids]);
 
   const clearBoundaries = () => {
-    if (divisionLayerRef.current) {
-      divisionLayerRef.current.remove();
-      divisionLayerRef.current = null;
-    }
-    if (districtLayerRef.current) {
-      districtLayerRef.current.remove();
-      districtLayerRef.current = null;
-    }
+    resetDivisionStyles();
+    resetDistrictStyles();
     setSelectedDivision('');
     setSelectedDistrict('');
     if (mapRef.current) mapRef.current.setView(defaultCenter, defaultZoom, { animate: true });
@@ -519,10 +573,10 @@ export default function MapContent() {
 
   useEffect(() => {
     return () => {
-      if (divisionLayerRef.current) divisionLayerRef.current.remove();
-      if (districtLayerRef.current) districtLayerRef.current.remove();
-      if (allDivisionsLayerRef.current) allDivisionsLayerRef.current.remove();
-      if (allDistrictsLayerRef.current) allDistrictsLayerRef.current.remove();
+      try { divisionLayerRef.current?.remove?.(); } catch {}
+      try { districtLayerRef.current?.remove?.(); } catch {}
+      try { allDivisionsLayerRef.current?.remove?.(); } catch {}
+      try { allDistrictsLayerRef.current?.remove?.(); } catch {}
     };
   }, []);
 
@@ -545,12 +599,6 @@ export default function MapContent() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <div className="bg-white border-b shadow-sm">
-        <div className="px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-800">Bangladesh Map - Divisions & Districts</h1>
-          <p className="text-sm text-gray-600 mt-1">Explore divisions and districts with actual administrative boundaries</p>
-        </div>
-      </div>
 
       <div className="bg-white border-b shadow-sm px-6 py-4">
         <div className="flex flex-wrap gap-3 items-center">
@@ -599,15 +647,6 @@ export default function MapContent() {
             </div>
           </div>
         )}
-
-        {loadError && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700">{loadError}</p>
-            <p className="mt-2 text-xs text-gray-600">
-              To use exact boundaries, add bd-divisions.json & bd-districts.json to your project's public/ folder and reload.
-            </p>
-          </div>
-        )}
       </div>
 
       <div className="flex-1 relative">
@@ -622,24 +661,6 @@ export default function MapContent() {
         )}
       </div>
 
-      <div className="absolute bottom-6 right-6 bg-white rounded-lg shadow-lg p-4 max-w-xs z-[1000]">
-        <h3 className="font-semibold text-sm text-gray-800 mb-3">Legend</h3>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-8 h-3 border-2 border-gray-400" style={{ backgroundColor: 'rgba(100, 100, 100, 0.1)' }} />
-            <span className="text-gray-600">Administrative Boundary</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-8 h-3 border-2 border-blue-500" style={{ backgroundColor: 'rgba(59, 130, 246, 0.3)' }} />
-            <span className="text-gray-600">Highlighted Area</span>
-          </div>
-        </div>
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
-            Select a division or district to highlight its administrative area. For exact boundaries, place bd-divisions.json & bd-districts.json in public/.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
