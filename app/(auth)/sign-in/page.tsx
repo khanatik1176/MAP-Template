@@ -12,8 +12,8 @@ import { useRouter } from 'next/navigation';
 import { TSignInFormInputs } from '@/types/Auth.types';
 import Cookies from 'js-cookie';
 import { SignInSchema } from '@/schema/Auth.Schema';
-import { useMutation } from '@tanstack/react-query';
 import { handleSignIn } from '@/helpers/Auth.Api';
+import { useMutation } from '@tanstack/react-query';
 
 const SignIn = () => {
   const router = useRouter();
