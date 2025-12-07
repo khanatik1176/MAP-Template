@@ -1,8 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { MapPin, Truck, BarChart2, Clock, Users, TrendingUp } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
+
+  redirect('/sign-in');
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100 text-gray-800">
       {/* Hero */}
