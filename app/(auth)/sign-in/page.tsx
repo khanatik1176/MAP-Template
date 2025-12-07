@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Circle } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -177,8 +177,8 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center p-4">
-      <div className="flex flex-col md:flex-row w-full max-w-6xl bg-white rounded-3xl shadow-xl overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-emerald-50 via-sky-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="flex flex-col md:flex-row w-full max-w-6xl bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl overflow-hidden">
         {/* Form first on mobile (order-1), but on md+ show form on the right (order-2) */}
         <div className="order-1 md:order-2 w-full md:w-3/5 bg-white p-6 md:p-10 flex flex-col justify-center rounded-b-3xl md:rounded-r-3xl">
           {/* Logo above form: centered on small screens, aligned right on md+ */}
@@ -194,7 +194,7 @@ export default function SignIn() {
 
           <div className="mb-6 text-center">
             <h1 className="text-3xl font-bold text-gray-800">Sign In</h1>
-            <p className="text-sm text-gray-500 mt-1">Login to continue</p>
+            <p className="text-sm text-gray-600 mt-1">Login to continue</p>
           </div>
 
           <form className="flex flex-col gap-5" onSubmit={handleSubmit(handleSubmission)}>
@@ -234,9 +234,9 @@ export default function SignIn() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full mt-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-2">
+            <Button type="submit" className="w-full mt-2 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-800 text-white font-semibold py-2">
               {SignInMutation.isPending ? (
-                <Circle className="animate-spin" />
+                <LoaderCircle className="animate-spin" />
               ) : (
                 "Sign In"
               )}

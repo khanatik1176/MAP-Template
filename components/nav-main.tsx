@@ -39,15 +39,9 @@ export function NavMain({
   onItemClick: (title: string) => void;
 }) {
   const activeItems = [
-    'Map',
-    'Device Runtimes',
-    'Sensors',
-    'Heart Beats',
-    'Locations',
-    'Device External Voltages',
-    'Yamaha Battery',
-    'Library',
-    'Offline Devices',
+    'Dashboard',
+    'Territory Map',
+    'District Map',
   ];
   const pathname = usePathname();
 
@@ -68,7 +62,7 @@ export function NavMain({
   }, [currentSelectedItem, items]);
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className='bg-black'>
       {/* <SidebarGroupLabel className='text-[#3D3D3DB2]'>Activities</SidebarGroupLabel> */}
       <SidebarMenu>
         {items.map((item) => {
@@ -84,7 +78,7 @@ export function NavMain({
                   <div className="relative w-full flex items-center">
                     <SidebarMenuButton
                       className={cn(
-                        'hover:bg-primary hover:text-white flex items-center w-full pr-10', // space for chevron
+                        'hover:bg-primary hover:text-white flex items-center w-full pr-10 ', // space for chevron
                         {
                           'bg-primary text-white': currentSelectedItem === item.title,
                           'hover:bg-sidebarHoverBg hover:text-black': currentSelectedItem !== item.title,

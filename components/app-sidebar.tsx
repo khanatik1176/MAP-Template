@@ -26,7 +26,7 @@ import { usePathname } from 'next/navigation';
 import { TeamSwitcher } from './team-switcher';
 import { NavMain } from './nav-main';
 
-import SidebarLogo from '../public/logo/MT_Logo.png';
+import SidebarLogo from '../public/logo/ACI-Logo.png';
 
 const defaultData = {
   user: {
@@ -36,71 +36,28 @@ const defaultData = {
   },
   teams: [
     {
-      name: 'Motor Telematics',
+      name: 'ACI Map',
       logo: SidebarLogo,
-      // plan: 'User',
+      plan: 'User',
     },
   ],
   navMain: [
     {
-      title: 'Map',
-      url: '/map',
+      title: 'Dashboard',
+      url: '/dashboard',
+      icon: Home,
+    },
+    {
+      title: 'Territory Map',
+      url: '/territory-map',
       icon: MapPin,
       isActive: true,
     },
     {
-      title: 'Device Runtimes',
-      url: '/device-runtimes',
-      icon: Timer,
+      title: 'District Map',
+      url: '/district-map',
+      icon: MapPin,
     },
-    {
-      title: 'Sensors',
-      url: '/sensors',
-      icon: Cpu,
-    },
-        {
-      title: 'Heart Beats',
-      url: '/heartbeats',
-      icon: HeartPulse,
-    },
-        {
-      title: 'Locations',
-      url: '/locations',
-      icon: Map,
-    },
-            {
-      title: 'Device External Voltages',
-      url: '/device-external-voltages',
-      icon: CircuitBoard,
-    },
-    {
-      title: 'Yamaha Battery',
-      url: '/yamaha-battery',
-      icon: Battery,
-    },
-    {
-      title: 'Offline Devices',
-      url: '/offline-devices',
-      icon: Tractor,
-       subNav: [
-        {
-          title: 'Dashboard',
-          url: '/offline-devices/dashboard',
-          icon: Home,
-        },
-        {
-          title: 'Location',
-          url: '/offline-devices/location',
-          icon: Map,
-        },
-        {
-          title: 'Storage',
-          url: '/offline-devices/storage',
-          icon: Database,
-        },
-      ],
-    }
-
   ],
 };
 
