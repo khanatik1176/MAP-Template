@@ -62,7 +62,7 @@ export function NavMain({
   }, [currentSelectedItem, items]);
 
   return (
-    <SidebarGroup className='bg-black'>
+    <SidebarGroup>
       {/* <SidebarGroupLabel className='text-[#3D3D3DB2]'>Activities</SidebarGroupLabel> */}
       <SidebarMenu>
         {items.map((item) => {
