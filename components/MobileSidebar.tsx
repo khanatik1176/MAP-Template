@@ -3,6 +3,7 @@
 import { X, Home, MapIcon, MapPin, Settings, HelpCircle, Settings2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import {
   SidebarHeader,
@@ -18,11 +19,18 @@ import {
 import logo from "../public/logo/ACI-Logo.png";
 import { MobileSidebarProps } from "@/types/Global.types";
 
-
-
 const menuHover = "hover:bg-green-50 hover:text-green-700";
+const activeClasses = "bg-green-700 text-white";
 
 export default function MobileSidebar({ open, setOpen }: MobileSidebarProps) {
+  const pathname = usePathname() || "";
+
+  const isActive = (path: string) => {
+    if (!path) return false;
+    if (path === "/") return pathname === "/";
+    return pathname === path || pathname.startsWith(path + "/");
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -60,7 +68,11 @@ export default function MobileSidebar({ open, setOpen }: MobileSidebarProps) {
                   <SidebarMenu>
                     <SidebarMenuItem>
                       <Link href="/dashboard">
-                        <SidebarMenuButton onClick={() => setOpen(false)} className={menuHover}>
+                        <SidebarMenuButton
+                          onClick={() => setOpen(false)}
+                          className={`${menuHover} ${isActive("/dashboard") ? activeClasses : ""}`}
+                          aria-current={isActive("/dashboard") ? "page" : undefined}
+                        >
                           <Home className="w-4 h-4" />
                           Dashboard
                         </SidebarMenuButton>
@@ -69,7 +81,11 @@ export default function MobileSidebar({ open, setOpen }: MobileSidebarProps) {
 
                     <SidebarMenuItem>
                       <Link href="/territory-map">
-                        <SidebarMenuButton onClick={() => setOpen(false)} className={menuHover}>
+                        <SidebarMenuButton
+                          onClick={() => setOpen(false)}
+                          className={`${menuHover} ${isActive("/territory-map") ? activeClasses : ""}`}
+                          aria-current={isActive("/territory-map") ? "page" : undefined}
+                        >
                           <MapPin className="w-4 h-4" />
                           Territory Map
                         </SidebarMenuButton>
@@ -78,7 +94,11 @@ export default function MobileSidebar({ open, setOpen }: MobileSidebarProps) {
 
                     <SidebarMenuItem>
                       <Link href="/district-map">
-                        <SidebarMenuButton onClick={() => setOpen(false)} className={menuHover}>
+                        <SidebarMenuButton
+                          onClick={() => setOpen(false)}
+                          className={`${menuHover} ${isActive("/district-map") ? activeClasses : ""}`}
+                          aria-current={isActive("/district-map") ? "page" : undefined}
+                        >
                           <MapIcon className="w-4 h-4" />
                           District Map
                         </SidebarMenuButton>
@@ -93,7 +113,11 @@ export default function MobileSidebar({ open, setOpen }: MobileSidebarProps) {
                   <SidebarMenu>
                     <SidebarMenuItem>
                       <Link href="/territory-mapping">
-                        <SidebarMenuButton onClick={() => setOpen(false)} className={menuHover}>
+                        <SidebarMenuButton
+                          onClick={() => setOpen(false)}
+                          className={`${menuHover} ${isActive("/territory-mapping") ? activeClasses : ""}`}
+                          aria-current={isActive("/territory-mapping") ? "page" : undefined}
+                        >
                           <Settings2 className="w-4 h-4" />
                           Territory Mapping
                         </SidebarMenuButton>
@@ -106,7 +130,11 @@ export default function MobileSidebar({ open, setOpen }: MobileSidebarProps) {
                   <SidebarMenu>
                     <SidebarMenuItem>
                       <Link href="/settings">
-                        <SidebarMenuButton onClick={() => setOpen(false)} className={menuHover}>
+                        <SidebarMenuButton
+                          onClick={() => setOpen(false)}
+                          className={`${menuHover} ${isActive("/settings") ? activeClasses : ""}`}
+                          aria-current={isActive("/settings") ? "page" : undefined}
+                        >
                           <Settings className="w-4 h-4" />
                           Settings
                         </SidebarMenuButton>
@@ -115,7 +143,11 @@ export default function MobileSidebar({ open, setOpen }: MobileSidebarProps) {
 
                     <SidebarMenuItem>
                       <Link href="/help">
-                        <SidebarMenuButton onClick={() => setOpen(false)} className={menuHover}>
+                        <SidebarMenuButton
+                          onClick={() => setOpen(false)}
+                          className={`${menuHover} ${isActive("/help") ? activeClasses : ""}`}
+                          aria-current={isActive("/help") ? "page" : undefined}
+                        >
                           <HelpCircle className="w-4 h-4" />
                           Help
                         </SidebarMenuButton>
