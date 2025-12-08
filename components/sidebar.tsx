@@ -1,7 +1,7 @@
 "use client";
 import React, { FC } from "react";
 import { SidebarProvider } from "./ui/sidebar";
-import { AppSidebar } from "./app-sidebar";
+import AppSidebar from "./app-sidebar";
 
 type TSidebarprop = {
   children: React.ReactNode;

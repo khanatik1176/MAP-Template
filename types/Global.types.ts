@@ -39,3 +39,8 @@ export type IHeadingProps = {
     subTitleClassName?: string;
     className?: string;
 };
+
+export type MobileSidebarProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+};

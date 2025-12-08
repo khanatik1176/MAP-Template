@@ -25,7 +25,7 @@ export function TeamSwitcher({
   const { toggleSidebar } = useSidebar();
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className='bg-white rounded-lg py-4 mt-2'>
       <SidebarMenuItem>
         {/* <DropdownMenu> */}
         {/* <DropdownMenuTrigger asChild> */}

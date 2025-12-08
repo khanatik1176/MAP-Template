@@ -42,6 +42,7 @@ export function NavMain({
     'Dashboard',
     'Territory Map',
     'District Map',
+    'Settings',
   ];
   const pathname = usePathname();
 
@@ -62,7 +63,8 @@ export function NavMain({
   }, [currentSelectedItem, items]);
 
   return (
-    <SidebarGroup>
+    <div className='px-2'>
+    <SidebarGroup className='bg-white rounded-lg mt-0'>
       {/* <SidebarGroupLabel className='text-[#3D3D3DB2]'>Activities</SidebarGroupLabel> */}
       <SidebarMenu>
         {items.map((item) => {
@@ -139,8 +141,8 @@ export function NavMain({
                       className={cn(
                         'hover:bg-primary hover:text-white flex items-center',
                         {
-                          'bg-primary text-white': currentSelectedItem === item.title,
-                          'hover:bg-sidebarHoverBg hover:text-black': currentSelectedItem !== item.title,
+                          'bg-gradient-to-br from-lime-50 via-green-400 to-green-50 text-white': currentSelectedItem === item.title,
+                          'hover:bg-gradient-to-br from-lime-50 via-green-200 to-green-50 hover:text-black': currentSelectedItem !== item.title,
                           'cursor-not-allowed text-gray-400': !activeItems.includes(item.title),
                         }
                       )}
@@ -150,7 +152,7 @@ export function NavMain({
                       {item.icon && (
                         <item.icon
                           className={cn('w-6 h-6', {
-                            'text-white': currentSelectedItem === item.title,
+                            'text-black': currentSelectedItem === item.title,
                             'text-navbartextColor': currentSelectedItem !== item.title,
                             'text-gray-400': !activeItems.includes(item.title),
                           })}
@@ -159,7 +161,7 @@ export function NavMain({
                       )}
                       <span
                         className={cn('text-sm', {
-                          'text-white': currentSelectedItem === item.title,
+                          'text-black': currentSelectedItem === item.title,
                           'text-navbartextColor': currentSelectedItem !== item.title,
                           'text-gray-400': !activeItems.includes(item.title),
                         })}
@@ -218,5 +220,6 @@ export function NavMain({
         })}
       </SidebarMenu>
     </SidebarGroup>
+    </div>
   );
 }
