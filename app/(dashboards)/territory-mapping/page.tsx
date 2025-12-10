@@ -78,7 +78,7 @@ const TerritoryMapping = () => {
     handleView({ id: r.id, name: r.name, assignedTerritories: r.assignedTerritories });
 
   return (
-    <main className="min-h-screen bg-white p-6">
+    <main className="min-h-[350px] bg-white p-6">
       <div className="max-w-5xl mx-auto">
         <header className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-semibold text-gray-900">Territory Mapping</h1>
@@ -86,14 +86,14 @@ const TerritoryMapping = () => {
           <div>
             <Button variant="greenish" size="md" onClick={openCreateModal} className="inline-flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Add territory
+              Add Territory Mapping
             </Button>
 
-            <ModalCustom open={modalOpen} onOpenChange={setModalOpen} title={editingId ? "Edit Territory" : "Create Territory"}>
+            <ModalCustom open={modalOpen} onOpenChange={setModalOpen} title={editingId ? "Edit Territory Mapping" : "Create Territory Mapping"} height="max-h-[250px]">
               <div className="p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold">{editingId ? "Edit Territory" : "Create Territory"}</h2>
+                    <h2 className="text-lg font-semibold">{editingId ? "Edit Territory Mapping" : "Create Territory Mapping"}</h2>
                     <p className="mt-1 text-sm text-gray-600">Provide a name for the territory mapping entry.</p>
                   </div>
                   <div>
@@ -108,7 +108,7 @@ const TerritoryMapping = () => {
                   </div>
                 </div>
 
-                <div className="mt-32 flex justify-end gap-2">
+                <div className="mt-8 flex justify-end gap-2">
                   <Button variant="outline" size="md" onClick={() => setModalOpen(false)}>Cancel</Button>
                   <Button variant="greenish" size="md" onClick={handleSave}>{editingId ? "Save" : "Create"}</Button>
                 </div>

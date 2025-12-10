@@ -1,15 +1,15 @@
 'use client';
 import React, { useMemo } from 'react';
-import { Edit, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { ColumnDef } from '@tanstack/react-table';
 import { GenericTable } from '@/components/GenericTable';
-import { useTerritoryContext } from '@/contexts/TerritoryContext';
 import { useSearchParams } from 'next/navigation';
+import type { Territory as TerritoryType } from '@/types/Territory.types';
 
 export type TerritoryRow = {
   id: number;
   name: string;
-  assignedTerritories: number[]; // now store ids
+  unionIds: number[];
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -35,23 +35,26 @@ function pickTagStyle(value: string, styles = TAG_STYLES) {
   return styles[idx];
 }
 
-export default function CustomTable({
-  rows,
-  onEdit,
+export default function TerritoryTable({
+  territories,
   onView,
 }: {
-  rows: TerritoryRow[];
-  onEdit: (r: TerritoryRow) => void;
-  onView: (r: TerritoryRow) => void;
+  territories: TerritoryType[];
+  onView: (t: TerritoryType) => void;
 }) {
-  const { territories } = useTerritoryContext();
   const searchParams = useSearchParams();
   const pageNumber = Number(searchParams.get('page') || '1');
 
-  const resolveNames = (ids: number[]) =>
-    ids.map((id) => territories.find((t) => t.id === id)?.name || `#${id}`);
+  // resolve names for unions — here we don't have a union lookup, so show "#id"
+  const resolveNames = (ids: number[]) => ids.map((id) => `#${id}`);
 
-  // Columns for GenericTable — terrritory UI requires territories data, so create columns inside component
+  // map territories to lightweight rows if needed by GenericTable (we'll reference original data via row.original)
+  const rows: TerritoryRow[] = territories.map((t) => ({
+    id: t.id,
+    name: t.name,
+    unionIds: t.unionIds || [],
+  }));
+
   const columns = useMemo<ColumnDef<TerritoryRow>[]>(
     () => [
       {
@@ -61,13 +64,13 @@ export default function CustomTable({
         cell: ({ row }) => <div className="text-sm font-medium text-gray-900">{row.getValue('name')}</div>,
       },
       {
-        id: 'territories',
-        header: () => <div className="font-medium">Territories</div>,
+        id: 'unions',
+        header: () => <div className="font-medium">Unions</div>,
         cell: ({ row }) => {
-          const assignedIds: number[] = row.original.assignedTerritories || [];
+          const assignedIds: number[] = row.original.unionIds || [];
           const assignedNames = resolveNames(assignedIds);
           if (!assignedNames || assignedNames.length === 0) {
-            return <div className="text-sm text-gray-500">No territories</div>;
+            return <div className="text-sm text-gray-500">No unions</div>;
           }
 
           return (
@@ -77,8 +80,8 @@ export default function CustomTable({
                   className="inline-flex items-center justify-center min-w-[30px] h-7 px-2 rounded-full bg-gray-100 text-sm font-medium text-gray-800 border"
                   aria-haspopup="true"
                   aria-expanded="false"
-                  aria-label={`${assignedNames.length} territories`}
-                  title={`${assignedNames.length} territories`}
+                  aria-label={`${assignedNames.length} unions`}
+                  title={`${assignedNames.length} unions`}
                 >
                   {assignedNames.length}
                 </span>
@@ -87,16 +90,16 @@ export default function CustomTable({
                   role="tooltip"
                   className="pointer-events-none invisible opacity-0 group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100 transition-opacity duration-150 transform -translate-y-1 group-hover:translate-y-0 absolute left-1/2 -translate-x-1/2 mt-2 z-50 w-64 max-h-48 overflow-auto rounded-md border bg-white p-3 shadow-lg"
                 >
-                  <div className="text-xs text-gray-500 mb-2">Territories</div>
+                  <div className="text-xs text-gray-500 mb-2">Unions</div>
                   <div className="flex flex-wrap gap-2">
-                    {assignedNames.map((territory, idx) => {
-                      const style = pickTagStyle(territory);
+                    {assignedNames.map((union, idx) => {
+                      const style = pickTagStyle(union);
                       return (
                         <span
-                          key={`${row.original.id}-territory-${idx}`}
+                          key={`${row.original.id}-union-${idx}`}
                           className={`inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs font-medium ${style}`}
                         >
-                          {territory}
+                          {union}
                         </span>
                       );
                     })}
@@ -104,10 +107,10 @@ export default function CustomTable({
                 </div>
               </div>
 
-              <div className="text-sm text-gray-500 truncate max-w-[180px]">
+              {/* <div className="text-sm text-gray-500 truncate max-w-[180px]">
                 {assignedNames[0]}
                 {assignedNames.length > 1 ? ` +${assignedNames.length - 1}` : ''}
-              </div>
+              </div> */}
             </div>
           );
         },
@@ -116,25 +119,15 @@ export default function CustomTable({
         id: 'actions',
         header: () => <div className="font-medium text-right">Actions</div>,
         cell: ({ row }) => {
-          const r = row.original as TerritoryRow;
+          const originalTerritory = territories.find((t) => t.id === row.original.id)!;
           return (
             <div className="flex justify-end">
               <div className="inline-flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => onEdit(r)}
+                  onClick={() => onView(originalTerritory)}
                   className="inline-flex items-center gap-2 rounded-md border px-3 py-1 text-sm"
-                  aria-label={`Edit ${r.name}`}
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => onView(r)}
-                  className="inline-flex items-center gap-2 rounded-md border px-3 py-1 text-sm"
-                  aria-label={`View ${r.name}`}
+                  aria-label={`View ${row.original.name}`}
                 >
                   <Eye className="h-4 w-4" />
                   View
@@ -145,10 +138,10 @@ export default function CustomTable({
         },
       },
     ],
-    [territories, onEdit, onView] // recreate when territories or handlers change
+    [territories, onView]
   );
 
-  // client-side pagination: slice rows according to pageNumber and ITEMS_PER_PAGE
+  // client-side pagination
   const totalCount = rows.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
   const safePage = Math.min(Math.max(1, pageNumber || 1), totalPages);
@@ -157,33 +150,31 @@ export default function CustomTable({
     return rows.slice(start, start + ITEMS_PER_PAGE);
   }, [rows, safePage]);
 
-  // GenericTable expects totalCountAndLimit and currentPage (server-style). We provide a refetch stub.
   const totalCountAndLimit = { totalCount, size: ITEMS_PER_PAGE };
 
   return (
-      <div className="mt-2">
-        <GenericTable
-          columns={columns}
-          data={pageData}
-          totalCountAndLimit={totalCountAndLimit}
-          currentPage={safePage}
-          loading={false}
-          refetch={() => {
-            // For client-side data, nothing to fetch. URL page param is handled by GenericPagination/router.
-            // Keeping this here so GenericTable can call it (it expects a refetch function).
-            return;
-          }}
-          headerClassNames={{
-            name: 'min-w-[220px] w-[220px] pl-4',
-            territories: 'min-w-[300px] w-[300px]',
-            actions: 'min-w-[160px] w-[160px] text-right pr-4',
-          }}
-          cellClassNames={{
-            name: 'min-w-[220px] w-[220px] !pl-4 truncate',
-            territories: 'min-w-[300px] w-[300px] !pr-2',
-            actions: 'min-w-[160px] w-[160px] !pr-4',
-          }}
-        />
-      </div>
+    <div className="mt-2">
+      <GenericTable
+        columns={columns}
+        data={pageData}
+        totalCountAndLimit={totalCountAndLimit}
+        currentPage={safePage}
+        loading={false}
+        refetch={() => {
+          // client-side list – nothing to fetch
+          return;
+        }}
+        headerClassNames={{
+          name: 'min-w-[220px] w-[220px] pl-4',
+          unions: 'min-w-[300px] w-[300px]',
+          actions: 'min-w-[160px] w-[160px] text-right pr-4',
+        }}
+        cellClassNames={{
+          name: 'min-w-[220px] w-[220px] !pl-4 truncate',
+          unions: 'min-w-[300px] w-[300px] !pr-2',
+          actions: 'min-w-[160px] w-[160px] !pr-4',
+        }}
+      />
+    </div>
   );
 }

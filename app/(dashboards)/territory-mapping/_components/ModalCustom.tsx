@@ -7,11 +7,13 @@ export default function ModalCustom({
   onOpenChange,
   children,
   title,
+  height,
 }: {
   open: boolean;
   onOpenChange: (next: boolean) => void;
   children: React.ReactNode;
   title?: string;
+  height?: string;
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,7 +45,7 @@ export default function ModalCustom({
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div
-          className="w-full max-w-[600px] h-full max-h-[420px] transform overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5"
+          className={`w-full max-w-[600px] h-full ${height || 'max-h-[420px]'} transform overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5`}
           onClick={(e) => e.stopPropagation()}
         >
           {children}
