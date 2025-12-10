@@ -10,8 +10,8 @@ import { redirect } from 'next/navigation';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Motor Telematics',
-  description: 'Performance Automation for Motor Telematics Team',
+  title: 'ACI MAP',
+  description: 'Performance Automation for ACI MAP Team',
   icons: {
     icon: '/favicon.ico',
   },

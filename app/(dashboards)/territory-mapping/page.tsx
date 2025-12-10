@@ -5,42 +5,31 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Option, Territory } from "@/types/Territory.types";
 import CustomTable, { TerritoryRow } from "./_components/CustomTable";
 import ModalCustom from "./_components/ModalCustom";
-import MultiSelectCustom from "./_components/MultiSelectCustom";
 import EmptyView from "./_components/EmptyView";
-
+import { MappingTerritory } from "@/types/TerritoryContext.types";
+import { useTerritoryContext } from "@/contexts/TerritoryContext";
 
 /**
- * Mock territory options - replace with API calls as needed
+ * Territory Mapping page
+ * - Only collects a name when creating/editing mapping entries.
+ * - Doesn't include territory selection here; assignedTerritories is empty on create.
  */
-const TERRITORY_OPTIONS = [
-  "Territory Alpha",
-  "Territory Beta",
-  "Territory Gamma",
-  "Territory Delta",
-];
-
-
-
 const TerritoryMapping = () => {
-  const [territories, setTerritories] = useState<Territory[]>([]);
+  const { mappingTerritories, addMappingTerritory, updateMappingTerritory } = useTerritoryContext();
+
   const [modalOpen, setModalOpen] = useState(false);
 
   // form state inside modal
   const [name, setName] = useState("");
-  const [selectedAssignedTerritoryIds, setSelectedAssignedTerritoryIds] = useState<number[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
-
-  const territoryOptions: Option[] = TERRITORY_OPTIONS.map((t, i) => ({ id: i + 1, name: t }));
 
   const router = useRouter();
 
   useEffect(() => {
     if (!modalOpen) {
       setName("");
-      setSelectedAssignedTerritoryIds([]);
       setEditingId(null);
     }
   }, [modalOpen]);
@@ -48,17 +37,12 @@ const TerritoryMapping = () => {
   const openCreateModal = () => {
     setEditingId(null);
     setName("");
-    setSelectedAssignedTerritoryIds([]);
     setModalOpen(true);
   };
 
-  const openEditModal = (t: Territory) => {
+  const openEditModal = (t: MappingTerritory) => {
     setEditingId(t.id);
     setName(t.name);
-    const ids = t.assignedTerritories
-      .map((n) => territoryOptions.find((o) => o.name === n)?.id)
-      .filter((v): v is number => typeof v === "number");
-    setSelectedAssignedTerritoryIds(ids);
     setModalOpen(true);
   };
 
@@ -67,40 +51,31 @@ const TerritoryMapping = () => {
       alert("Please enter a name");
       return;
     }
-    if (!selectedAssignedTerritoryIds || selectedAssignedTerritoryIds.length === 0) {
-      alert("Please select at least one territory from the list");
-      return;
-    }
-
-    const selectedNames = selectedAssignedTerritoryIds
-      .map((id) => territoryOptions.find((o) => o.id === id)?.name)
-      .filter((n): n is string => typeof n === "string");
 
     if (editingId != null) {
-      setTerritories((prev) =>
-        prev.map((p) =>
-          p.id === editingId ? { ...p, name: name.trim(), assignedTerritories: selectedNames } : p
-        )
-      );
+      // Only update the name; leave assignedTerritories unchanged.
+      updateMappingTerritory(editingId, { name: name.trim() });
     } else {
       const id = Date.now();
-      const next: Territory = {
+      const next: MappingTerritory = {
         id,
         name: name.trim(),
-        assignedTerritories: selectedNames,
+        assignedTerritories: [], // no territories selected from this page
       };
-      setTerritories((s) => [next, ...s]);
+      addMappingTerritory(next);
     }
 
     setModalOpen(false);
   };
 
-  const handleView = (t: Territory) => {
+  const handleView = (t: MappingTerritory) => {
     router.push(`/territory-mapping/${t.id}`);
   };
 
-  const handleEditRow = (r: TerritoryRow) => openEditModal({ id: r.id, name: r.name, assignedTerritories: r.assignedTerritories });
-  const handleViewRow = (r: TerritoryRow) => handleView({ id: r.id, name: r.name, assignedTerritories: r.assignedTerritories });
+  const handleEditRow = (r: TerritoryRow) =>
+    openEditModal({ id: r.id, name: r.name, assignedTerritories: r.assignedTerritories });
+  const handleViewRow = (r: TerritoryRow) =>
+    handleView({ id: r.id, name: r.name, assignedTerritories: r.assignedTerritories });
 
   return (
     <main className="min-h-screen bg-white p-6">
@@ -119,7 +94,7 @@ const TerritoryMapping = () => {
                 <div className="flex items-start justify-between">
                   <div>
                     <h2 className="text-lg font-semibold">{editingId ? "Edit Territory" : "Create Territory"}</h2>
-                    <p className="mt-1 text-sm text-gray-600">Provide a name and select one or more territories from the list.</p>
+                    <p className="mt-1 text-sm text-gray-600">Provide a name for the territory mapping entry.</p>
                   </div>
                   <div>
                     <button aria-label="Close" onClick={() => setModalOpen(false)} className="rounded bg-transparent px-2 py-1 text-sm">✕</button>
@@ -130,19 +105,6 @@ const TerritoryMapping = () => {
                   <div>
                     <label className="text-sm font-medium text-gray-700">Name</label>
                     <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" className="mt-2" />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Territories</label>
-                    <div className="mt-2">
-                      <MultiSelectCustom
-                        options={territoryOptions}
-                        selected={selectedAssignedTerritoryIds}
-                        onChange={setSelectedAssignedTerritoryIds}
-                        placeholder="Select territories"
-                        dropdownMaxHeight={320}
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -155,10 +117,10 @@ const TerritoryMapping = () => {
           </div>
         </header>
 
-        {territories.length === 0 ? (
+        {mappingTerritories.length === 0 ? (
           <EmptyView title="No territory available" description="You don't have any entries yet. Add entries to start mapping." />
         ) : (
-          <CustomTable rows={territories as TerritoryRow[]} onEdit={handleEditRow} onView={handleViewRow} />
+          <CustomTable rows={mappingTerritories as TerritoryRow[]} onEdit={handleEditRow} onView={handleViewRow} />
         )}
       </div>
     </main>
